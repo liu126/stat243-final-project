@@ -1,0 +1,114 @@
+initialize <- function (a,b)  {
+h1 <- function(x) {h(x)}
+h2 <- function(y) {h(y)}
+if (a == -Inf) {
+  x<-0
+  while(TRUE) {
+    if (numericDeriv(quote(h1(x)),"x") > 0)  {
+      break
+    }
+    else {
+      x <- x - 5
+    }
+  }
+} else {
+  x <- a
+}
+
+if (b == Inf) {
+  y<-0
+  while(TRUE) {
+    if ((numericDeriv(quote(h2(y)),"y") < 0) && y > x) {
+    #1stderiv <- numericDeriv(quote(h2(y)),"y")
+    #if (1stderiv < 0 && y > x) {
+      break
+    } else {
+      y <- y + 5
+      ## trying newton's method for more efficiency
+      #h <- 5e-6
+      #yplush <- y + h
+      #yminush <- y - h
+      #2ndderiv <- (numericDeriv(quote(f(x)),"xplush") - numericDeriv(quote(f(x)),"xminush"))/(2*h)
+      #y <- y - (1stderiv-1)/2ndderiv
+    }
+  }
+}  else {
+    y <- b
+  }
+  return(c(x,y))
+
+}
+
+checkconcave <- function(f, a, b)  {
+  x <- sample(1000,a,b)
+  h <- 5e-6
+  xplush <- x + h
+  xminush <- x - h
+  2ndderiv <- (numericDeriv(quote(f(x)),"xplush") - numericDeriv(quote(f(x)),"xminush"))/(2*h)
+  if (2ndderiv >= 0)  {
+    print("Function is not concave. Please input another function")
+    checkconcave(f,a,b)
+  } else {
+    print("Function is concave")
+  }
+}
+
+
+
+tk <- c(a,x1,x2,b)
+uk = h(xj) + (x-xj)*dh(xj)   for x belongs to [zj-1,zj]
+sk = exp(uk)/integration of something
+lk = ((xj+1 -x)*h(xj)+(x-xj)*h(xj+1))/(xj+1-xj)
+z = [z1,...,zk]
+z <- (h(x[2:length(x)] - h(x[1:(length(x)-1)])
+        - x[2:length(x)]*dh(x[2:length(x)]) + x[1:(length(x)-1)]*dh(x[1:(length(x)-1)]) )/(dh(x[1:(length(x)-1)) 
+      - dh(x[2:length(x)]))
+
+u <- function(x,[a,b],j) {
+  if (x <= b) && (x >=a) {
+  uk(x) = h(x) + (x-x[j])*dh(x[j])
+  }
+  else {
+   return(0)
+  }
+}
+
+
+l <- function(x,[a,b],j) {
+  if (x <= b) && (x >=a) {
+    lk(x) = ((x[j+1] -x)*h(x[j])+(x-x[j])*h(x[j+1]))/(x[j+1]-x[j])
+  }
+  else {
+    return(0)
+  }
+}
+      
+      
+sample x*
+w <- runif(1)
+ratio1 <- exp(lk(x*) - uk(x*))
+if (w <= ratio1) {
+  we accept x*
+ else {
+   update
+   ratio2 <- exp(h(x*) - uk(x*))
+    if (w <= ratio2) {
+    we also accept x*
+    else {
+      we reject x*
+    }
+    }
+  }
+
+}
+    
+
+# Update step
+temp <- sort(c(tk,x*), index.return = TRUE)
+ind <- temp$x[temp$ix == k+1]
+
+tkplusone <- temp$x
+ukplusone <- c(uk[1:ind-1],h(x) + (x-x[ind])*dh(x[ind]),uk[ind:length(uk)])
+skplusone <-
+lkplusone <- c(lk[1:ind-1], ((x[ind+1] -x)*h(x[ind])+(x-x[ind])*h(x[ind+1]))/(x[ind+1]-x[ind]) , lk[ind:length(lk)])
+k <- k+1
