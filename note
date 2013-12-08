@@ -1,0 +1,27 @@
+nsamp = numeric(n)
+ARsample(n, g(x), LB, UB)  {
+  h(x) = log[g(x)]
+  Tk = {x1,...,xk} [x1,x2]
+  hk = h(Tk)    [h(x1),h(x2)]
+  h`k = h`(Tk)  [h`(x1), h`(x2)]
+  z = {z0,...,zk} [LB,z,UB]
+  initialize x1,x2
+  while(m < n)  {
+    x* = sample point from s(x)
+    w = runif(1)
+    Calculate  U(x*) and L(x*)
+    Compare w to exp(L-U) = LUrat
+    if (w <= LUrat)
+      Accept
+    else
+      Update
+   if (w <= HUrat)
+     Accept
+
+Issues:
+-Pick x1, x2 (Do this!)
+-Define modules: sample from s(x), calculate U(x*) and L(x*)
+
+
+get toegher Monday  12/2
+Github account: Liu
