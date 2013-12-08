@@ -1,0 +1,125 @@
+ARsample <- function(n, gX, LB, UB) {
+  samps = numeric(n)  ## This will be the vector of samples that gets returned
+
+  ## Initialize values for the algorithm
+  init = initialize()  
+  numInit = length(init/3)
+  Tk = init[1:numInit]
+  hk = init[numInit+1:2*numInit]
+  dhk = init[2*numInit+1:3*numInit]
+
+  ## Define two hepler functions to calulate the log of g(x) and the derivative of the log of g(x)
+  hx <- function(x) return(log(gX(x)))
+  dhx <- function(x) {
+    eps = sqrt(.Machine$double.eps)
+    return((hx(x+eps/2) - hx(x-eps/2)) / eps)
+  }
+
+  ## Initialize z, the x coordinates where the pieces of u(x) intersect.
+  ## Also initialize hz, the corresponding y values of z, and
+  ## A, the piecewise areas under u(x)
+  z = numeric(numInit-1)
+  for (i in 1:(numInit-1))
+    z[i] = (hk[i+1] - hk[i] - Tk[i+1]*dhk[i+1] + Tk[i]*dhk[i]) / (dhk[i] - dhk[i+1])
+  z = c(LB, z, UB)
+  
+  hz = numeric(numInit+1)
+  for (i in 1:numInit) {
+    m = dhk[i]
+    x1 = Tk[i]
+    y1 = hk[i]
+    hz[i+1] = m*z[i+1] + (y1 - m*x1)
+    if (i == 1) hz[i] = m*z[i] + (y1 - m*x1)
+  }
+  
+  A = numeric(numInit)
+  for (i in 1:numInit) {
+    x1 = z[i]
+    y1 = hz[i]
+    x2 = z[i+1]
+    y2 = hz[i+1]
+    m = (y2-y1) / (x2-x1)
+    b = y1 - m*x1
+
+    A[i] = exp(y2)/m - exp(y1)/m
+  }
+
+  ## Let sumA be the total area under u(x) and ratioA be the cumulative percent area of each piece under u(x)
+  sumA = sum(A)
+  ratioA = A/sumA
+  for (i in 2:numInit) ratioA[i] = ratioA[i] + ratioA[i-1]
+
+  ## Keep sampling until we accept n values
+  num = 0
+  while (num < n) {
+    ## Calculate xStar, out sample candidate
+    u = runif(1)
+    indexA = which(ratioA>u)[1]
+    xStar = sampleExp(z[indexA], hz[indexA], z[indexA+1], hz[indexA+1], A[indexA])
+
+    ## Calculate xStar evaluated at u(x), uxStar
+    um = (hz[indexA+1] - hz[indexA]) / (z[indexA+1] - z[indexA])
+    ub = hz[indexA] - um*z[indexA]
+    uxStar = um*xStar + ub
+
+    ## Calculate xStar evaluated at l(x), lxStar
+    lxStar = 0
+    indexTk = which(xStar<Tk)[1]
+    if (indexTk == 1 | length(indexTx) == 0) lxStar = 0
+    else {
+      lm = (hx(Tk[indexTk]) - hx(Tk[indexTk-1])) / (Tk[indexTk] - Tk[indexTk-1])
+      lb = hx[indexTk] - lm*Tk[indexTk]
+      lxStar = lm*xStar + lb
+    }
+
+    ## Automatically accept if w <= exp(lxStar - uxStar)
+    w = runif(1)
+    LUratio = exp(lxStar - uxStar)
+    if (w <= LUratio) {
+      samps[num+1] = xStar
+      num = num+1
+    }
+    ## Otherwise, evaluate h(x), update our vectors, and check to see if we accept xStar
+    else {
+      hxStar = hx(xStar)
+      Tk = sort(c(Tk, xStar))
+      xIndex = which(Tk == xStar)
+      if (xIndex == 1) {
+        hk = c(hx(xStar), hk)
+        dhk = c(dhx(xStar), dhk)
+      }
+      else if (xIndex == length(Tk)) {
+        hk = c(hk, hx(xStar))
+        dhk = c(dhk, dhx(xStar))
+      }
+      else {
+        hk = c(hk[1:(xIndex-1)], hx(xStar), hk[xIndex:length(hk)])
+        dhk = c(dhk[1:(xIndex-1)], dhx(xStar), dhk[xIndex:length(dhk)])
+      }
+      zNew1 = (hk[xIndex] - hk[xIndex] - Tk[i+1]*dhk[i+1] + Tk[i]*dhk[i]) / (dhk[i] - dhk[i+1])
+      zNew2 =
+      z[xIndex] = znew1
+      z = sort(c(z, znew2)) ####
+      
+      HUratio = exp(hxStar - uxStar)
+      if (w <= HUratio) {
+        samps[num+1] = xStar
+        num = num+1
+      }
+    }
+  }
+}
+
+
+
+## Helper function to sample from a bounded exponentiated linear function
+sampleExp <- function(x1, y1, x2, y2, A) {
+  m = (y2-y1) / (x2-x1)
+  b = y1 - m*x1
+  u = runif(1)
+  
+  ans = u*A + exp(y1)/m
+  ans = (log(m*ans) - b)/m
+  return(ans)
+}
+
